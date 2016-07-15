@@ -10,38 +10,44 @@ object Inversions {
 
   def count(input: Array[Int]):Long = {
 
-    def countAndSort(input:Array[Int], start:Int, end:Int):(Long, Array[Int]) = {
-      if (end - start <= 1) (0, input.slice(start, end))
+    val fromBuff = Array.ofDim[Int](input.length)
+    val toBuff = Array.ofDim[Int](input.length)
+
+    input.copyToArray(toBuff)
+
+    def countAndSort(start:Int, end:Int):Long = {
+      if (end - start <= 1) 0
       else {
-        val mid = (end - start) / 2
+        val mid = start + (end - start) / 2
 
-        val (leftN, leftArr) = countAndSort(input, start, start + mid)
-        val (rightN, rightArr) = countAndSort(input, start + mid, end)
-        val (splitN, arr) = mergeAndCountSplits(leftArr, rightArr)
+        val leftN = countAndSort(start, mid)
+        val rightN = countAndSort(mid, end)
 
-        (leftN + rightN + splitN, arr)
+        val splitN = mergeAndCountSplits(start, mid, end)
+
+        leftN + rightN + splitN
       }
     }
 
-    def mergeAndCountSplits(left:Array[Int], right: Array[Int]):(Long, Array[Int]) = {
+    def mergeAndCountSplits(start:Int, mid:Int, end:Int):Long = {
       var n = 0L
-      var i = 0
-      var j = 0
-      val output = Array.ofDim[Int](left.length + right.length)
-      for(k <- 0 until output.length) {
-        if (j >= right.length || (i < left.length && left(i) <= right(j))) {
-          output(k) = left(i)
+      var i = start
+      var j = mid
+      Array.copy(toBuff, start, fromBuff, start, end - start)
+      for(k <- start until end) {
+        if (j >= end || (i < mid && fromBuff(i) <= fromBuff(j))) {
+          toBuff(k) = fromBuff(i)
           i += 1
         } else {
-          output(k) = right(j)
+          toBuff(k) = fromBuff(j)
           j += 1
-          n += left.length - i
+          n += mid - i
         }
       }
-      (n, output)
+      n
     }
 
-    countAndSort(input, 0, input.length)._1
+    countAndSort(0, input.length)
   }
 
   def main(args: Array[String]) {
