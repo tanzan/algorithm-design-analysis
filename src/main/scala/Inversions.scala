@@ -6,24 +6,52 @@ import scala.io.Source
 object Inversions {
 
 
-  def count(input: Array[Int]):Int = {
+  def count(input: Array[Int]):Long = {
 
-    def countAndSort(input:Array[Int], start:Int, end:Int, output:Array[Int]):Int = {
+    val fromBuff = Array.ofDim[Int](input.length)
+    val toBuff = Array.ofDim[Int](input.length)
 
-      val mid = (end - start) / 2
+    input.copyToArray(toBuff)
 
-      val left = countAndSort(input, start, mid, output)
-      val right = countAndSort(input, mid, end, output)
-      val split = mergeAndCountSplits(input, start, end, output)
+    def countAndSort(start:Int, end:Int):Long = {
+      if (end - start <= 1) 0
+      else {
+        val mid = start + (end - start) / 2
 
-      left + right + split
+        val leftN = countAndSort(start, mid)
+        val rightN = countAndSort(mid, end)
+
+        val splitN = mergeAndCountSplits(start, mid, end)
+
+        leftN + rightN + splitN
+      }
     }
 
-    def mergeAndCountSplits(input:Array[Int], start:Int, end:Int, output:Array[Int]):Int = {
-
+    def mergeAndCountSplits(start:Int, mid:Int, end:Int):Long = {
+      var n = 0L
+      var i = start
+      var j = mid
+      Array.copy(toBuff, start, fromBuff, start, end - start)
+      for(k <- start until end) {
+        if (j >= end || (i < mid && fromBuff(i) <= fromBuff(j))) {
+          toBuff(k) = fromBuff(i)
+          i += 1
+        } else {
+          toBuff(k) = fromBuff(j)
+          j += 1
+          n += mid - i
+        }
+      }
+      n
     }
 
-    countAndSort(input, 0, input.size, Array.ofDim(input.length))
+    countAndSort(0, input.length)
+  }
+
+  def main(args: Array[String]) {
+    val arr = readFromFile("IntegerArray.txt")
+    println(count(arr))
+
   }
 
 }
