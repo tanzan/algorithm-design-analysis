@@ -5,8 +5,6 @@ import scala.io.Source
   */
 object Inversions {
 
-  def readFromFile(fileName:String):Array[Int] =
-    Source.fromFile(fileName).getLines().map(_.toInt).toArray
 
   def count(input: Array[Int]):Int = {
 
