@@ -1,10 +1,9 @@
-import scala.io.Source
-
 /**
   * Created by serg on 14.07.16.
   */
 object Inversions {
 
+  import Util._
 
   def count(input: Array[Int]):Long = {
 
