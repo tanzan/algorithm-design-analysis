@@ -1,3 +1,4 @@
+import scala.annotation.tailrec
 import scala.io.Source
 import scala.collection._
 
@@ -20,7 +21,7 @@ object KosarajuSCC {
     }
 
     def vertices:Map[Int, Vertex] = _vertices
-    def adjList:Map[Vertex, Seq[Vertex]] = _adjList
+    def adjList(vertex: Vertex):Seq[Vertex] = _adjList.getOrElse(vertex, Seq.empty)
 
     def reverse():Graph = {
 
@@ -28,7 +29,7 @@ object KosarajuSCC {
 
       for(vId <- vertices.keys) {
         val v1 = vertices(vId)
-        for(v2 <- adjList.getOrElse(v1, Seq.empty)) {
+        for(v2 <- adjList(v1)) {
           reversed.addEdge(v1.id, v2.id)
         }
       }
@@ -49,17 +50,19 @@ object KosarajuSCC {
     graph
   }
 
-
-  def dfs(graph: Graph, s:Vertex): Unit = {
-
+  def dfs(graph: Graph, start:Vertex): Unit = {
+    start.visited = true
+    for (v <- graph.adjList(start) if !v.visited) {
+      if (!v.visited) dfs(graph, v)
+    }
   }
-
 
 
   def main(args: Array[String]): Unit = {
     val g = readFromFile("SCC.txt")
     println(g.vertices.size)
-    println(g.adjList.take(2))
+    g.vertices.values.foreach(v => if (!v.visited) dfs(g, v))
+    println(g.vertices.values.forall(_.visited))
   }
 
 }
