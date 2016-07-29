@@ -1,6 +1,5 @@
-import scala.annotation.tailrec
-import scala.io.Source
 import scala.collection._
+import scala.io.Source
 
 /**
   * Created by serg on 7/29/16.
