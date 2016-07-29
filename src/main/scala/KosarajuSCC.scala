@@ -20,15 +20,15 @@ object KosarajuSCC {
       _adjList.getOrElseUpdate(v1, mutable.ArrayBuffer[Vertex]()) += v2
     }
 
-    def vertices:Map[Int, Vertex] = _vertices
-    def adjList(vertex: Vertex):Seq[Vertex] = _adjList.getOrElse(vertex, Seq.empty)
+    def vertices:Iterable[Vertex] = _vertices.values
+    def adjList(vertex: Vertex):Iterable[Vertex] = _adjList.getOrElse(vertex, Seq.empty)
 
-    def reverse():Graph = {
+    def invert():Graph = {
 
       val reversed = new Graph
 
-      for(vId <- vertices.keys) {
-        val v1 = vertices(vId)
+      for(vId <- _vertices.keys) {
+        val v1 = _vertices(vId)
         for(v2 <- adjList(v1)) {
           reversed.addEdge(v1.id, v2.id)
         }
@@ -61,8 +61,8 @@ object KosarajuSCC {
   def main(args: Array[String]): Unit = {
     val g = readFromFile("SCC.txt")
     println(g.vertices.size)
-    g.vertices.values.foreach(v => if (!v.visited) dfs(g, v))
-    println(g.vertices.values.forall(_.visited))
+    g.vertices.foreach(v => if (!v.visited) dfs(g, v))
+    println(g.vertices.forall(_.visited))
   }
 
 }
