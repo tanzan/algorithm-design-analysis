@@ -30,7 +30,7 @@ object KosarajuSCC {
       for(vId <- _vertices.keys) {
         val v1 = _vertices(vId)
         for(v2 <- adjList(v1)) {
-          inverted.addEdge(v1.id, v2.id)
+          inverted.addEdge(v2.id, v1.id)
         }
       }
 
@@ -66,7 +66,7 @@ object KosarajuSCC {
     var leader:Option[Vertex] = None
 
     for(s <- inverted.vertices if !s.visited) {
-      dfs(graph, s) (v => ()){ v =>
+      dfs(inverted, s) (v => ()){ v =>
         v.finishTime = finishTime
         finishTime += 1
       }
@@ -86,7 +86,7 @@ object KosarajuSCC {
   def main(args: Array[String]): Unit = {
     val g = readFromFile("SCC.txt")
     scc(g)
-    println(g.vertices.groupBy(_.leader).mapValues(_.size).toVector.sortWith(_._2 > _._2).take(5))
+    println(g.vertices.groupBy(_.leader).mapValues(_.size).values.toVector.sortWith(_ > _).take(5))
   }
 
 }
