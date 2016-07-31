@@ -19,21 +19,22 @@ object KosarajuSCC {
       _adjList.getOrElseUpdate(v1, mutable.ArrayBuffer[Vertex]()) += v2
     }
 
+    def vertex(id:Int):Option[Vertex] = _vertices.get(id)
     def vertices:Iterable[Vertex] = _vertices.values
     def adjList(vertex: Vertex):Iterable[Vertex] = _adjList.getOrElse(vertex, Seq.empty)
 
     def invert():Graph = {
 
-      val reversed = new Graph
+      val inverted = new Graph
 
       for(vId <- _vertices.keys) {
         val v1 = _vertices(vId)
         for(v2 <- adjList(v1)) {
-          reversed.addEdge(v1.id, v2.id)
+          inverted.addEdge(v1.id, v2.id)
         }
       }
 
-      reversed
+      inverted
     }
   }
 
@@ -49,19 +50,43 @@ object KosarajuSCC {
     graph
   }
 
-  def dfs(graph: Graph, start:Vertex): Unit = {
+  def dfs(graph: Graph, start:Vertex)(before: Vertex => Unit)(after: Vertex => Unit): Unit = {
     start.visited = true
+    before(start)
     for (v <- graph.adjList(start) if !v.visited) {
-      if (!v.visited) dfs(graph, v)
+      dfs(graph, v)(before)(after)
     }
+    after(start)
+  }
+
+  def scc(graph: Graph):Unit = {
+
+    val inverted = graph.invert()
+    var finishTime = 0
+    var leader:Option[Vertex] = None
+
+    for(s <- inverted.vertices if !s.visited) {
+      dfs(graph, s) (v => ()){ v =>
+        v.finishTime = finishTime
+        finishTime += 1
+      }
+    }
+
+    for(i <- inverted.vertices.toVector.sortWith(_.finishTime > _.finishTime)) {
+      val s = graph.vertex(i.id)
+      if (!s.forall(_.visited)) {
+        leader = s
+        dfs(graph, s.get)(v => v.leader = leader)(v => ())
+      }
+    }
+
   }
 
 
   def main(args: Array[String]): Unit = {
     val g = readFromFile("SCC.txt")
-    println(g.vertices.size)
-    g.vertices.foreach(v => if (!v.visited) dfs(g, v))
-    println(g.vertices.forall(_.visited))
+    scc(g)
+    println(g.vertices.groupBy(_.leader).mapValues(_.size).toVector.sortWith(_._2 > _._2).take(5))
   }
 
 }
