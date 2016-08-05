@@ -1,3 +1,5 @@
+package graph
+
 import scala.collection._
 import scala.io.Source
 
@@ -6,22 +8,26 @@ import scala.io.Source
   */
 object KosarajuSCC {
 
-  class Vertex(val id:Int, var visited:Boolean = false,
-               var finishTime:Int = 0, var leader:Option[Vertex] = None)
+  trait Vertex {
+    def id:Int
+  }
+
+  class KVertex(val id:Int, var visited:Boolean = false,
+                var finishTime:Int = 0, var leader:Option[KVertex] = None)
 
   class Graph {
-    private val _vertices = mutable.Map[Int, Vertex]()
-    private val _adjList = mutable.Map[Vertex, mutable.ArrayBuffer[Vertex]]()
+    private val _vertices = mutable.Map[Int, KVertex]()
+    private val _adjList = mutable.Map[KVertex, mutable.ArrayBuffer[KVertex]]()
 
     def addEdge(vertexId1:Int, vertex2Id: Int):Unit =  {
-      val v1 = _vertices.getOrElseUpdate(vertexId1, new Vertex(vertexId1))
-      val v2 = _vertices.getOrElseUpdate(vertex2Id, new Vertex(vertex2Id))
-      _adjList.getOrElseUpdate(v1, mutable.ArrayBuffer[Vertex]()) += v2
+      val v1 = _vertices.getOrElseUpdate(vertexId1, new KVertex(vertexId1))
+      val v2 = _vertices.getOrElseUpdate(vertex2Id, new KVertex(vertex2Id))
+      _adjList.getOrElseUpdate(v1, mutable.ArrayBuffer[KVertex]()) += v2
     }
 
-    def vertex(id:Int):Option[Vertex] = _vertices.get(id)
-    def vertices:Iterable[Vertex] = _vertices.values
-    def adjList(vertex: Vertex):Iterable[Vertex] = _adjList.getOrElse(vertex, Seq.empty)
+    def vertex(id:Int):Option[KVertex] = _vertices.get(id)
+    def vertices:Iterable[KVertex] = _vertices.values
+    def adjList(vertex: KVertex):Iterable[KVertex] = _adjList.getOrElse(vertex, Seq.empty)
 
     def invert():Graph = {
 
@@ -50,7 +56,7 @@ object KosarajuSCC {
     graph
   }
 
-  def dfs(graph: Graph, start:Vertex)(before: Vertex => Unit)(after: Vertex => Unit): Unit = {
+  def dfs(graph: Graph, start:KVertex)(before: KVertex => Unit)(after: KVertex => Unit): Unit = {
     start.visited = true
     before(start)
     for (v <- graph.adjList(start) if !v.visited) {
@@ -63,7 +69,7 @@ object KosarajuSCC {
 
     val inverted = graph.invert()
     var finishTime = 0
-    var leader:Option[Vertex] = None
+    var leader:Option[KVertex] = None
 
     for(s <- inverted.vertices if !s.visited) {
       dfs(inverted, s) (v => ()){ v =>

@@ -1,3 +1,5 @@
+package graph
+
 import scala.io.Source
 import scala.util.Random
 
