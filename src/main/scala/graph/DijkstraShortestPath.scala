@@ -13,32 +13,24 @@ object DijkstraShortestPath {
 
   def shortestPaths(graph: Graph[DVertex], sourceId:Int):Unit = {
 
-    def relax(v1:DVertex, v2:DVertex):Boolean = {
+    def relax(v1:DVertex, v2:DVertex):Unit = {
       val dist = v1.distance + graph.edge(v1, v2).map(_.weight).toVector.min
       if (v2.distance > dist) {
         v2.distance = dist
-        true
       }
-      else false
     }
 
     graph.vertex(sourceId).foreach(_.distance = 0)
 
-    val scanned = mutable.Set[DVertex]()
-    scanned += graph.vertex(sourceId).get
-    val size = graph.vertices.size
+    val heap = mutable.Set[DVertex]()
+    heap ++= graph.vertices
 
-    while(scanned.size != size) {
-      val s = mutable.Set[DVertex]()
-      for(v1 <- scanned) {
-        for (v2 <- graph.adjList(v1)) {
-          if (!scanned.contains(v2)) {
-            relax(v1, v2)
-          }
-          s += v2
-        }
+    while(heap.nonEmpty) {
+      val v1 = heap.minBy(_.distance)
+      heap -= v1
+      for (v2 <- graph.adjList(v1)) {
+        relax(v1, v2)
       }
-      scanned ++= s
     }
 
   }
@@ -46,7 +38,7 @@ object DijkstraShortestPath {
   def main(args: Array[String]): Unit = {
     val g = Graph.readWeightedFromFile("dijkstraData.txt")
     shortestPaths(g, 1)
-    println(g.vertices.map(_.distance).toVector.sorted.take(11))
+    println(List(7,37,59,82,99,115,133,165,188,197).map(id => g.vertex(id).get.distance))
   }
 
 }
