@@ -1,4 +1,6 @@
-package sort
+package algo.sort
+
+import algo.Util
 
 import scala.util.Random
 
@@ -63,7 +65,8 @@ object QuickSort {
   def randomPivot(start:Int, end:Int, input:Array[Int]):Int = start + rng.nextInt(end - start)
 
   def main(args: Array[String]) {
-    val input = Util.readFromFile("QuickSort.txt")
+    import  Util._
+    val input = readArrayFromFile[Int]("QuickSort.txt")
     val a1 = input.map(x => x)
     val a2 = input.map(x => x)
     val a3 = input.map(x => x)

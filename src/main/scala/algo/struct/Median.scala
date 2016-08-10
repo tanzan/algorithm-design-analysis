@@ -1,9 +1,9 @@
-package struct
+package algo.struct
 
 /**
   * Created by serg on 8/9/16.
   */
-class Median {
+object Median {
 
   /*
     The goal of this problem is to implement the "Median Maintenance" algorithm (covered in the Week 5 lecture on heap applications).

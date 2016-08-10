@@ -1,11 +1,12 @@
-package sort
+package algo.sort
+
+import algo.Util
 
 /**
   * Created by serg on 14.07.16.
   */
 object Inversions {
 
-  import Util._
 
   def count(input: Array[Int]):Long = {
 
@@ -50,7 +51,8 @@ object Inversions {
   }
 
   def main(args: Array[String]) {
-    val arr = readFromFile("IntegerArray.txt")
+    import Util._
+    val arr = readArrayFromFile[Int]("IntegerArray.txt")
     println(count(arr))
 
   }

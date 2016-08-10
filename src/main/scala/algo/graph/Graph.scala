@@ -1,4 +1,4 @@
-package graph
+package algo.graph
 
 import scala.collection.{Iterable, Seq, mutable}
 import scala.io.Source

@@ -1,6 +1,4 @@
-package graph
-
-import scala.io.Source
+package algo.graph
 
 /**
   * Created by serg on 7/29/16.

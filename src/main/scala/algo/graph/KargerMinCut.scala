@@ -1,4 +1,4 @@
-package graph
+package algo.graph
 
 import scala.io.Source
 import scala.util.Random
