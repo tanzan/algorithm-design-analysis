@@ -2,8 +2,6 @@ package algo.struct
 
 import algo.Util
 
-import scala.collection.immutable.HashSet
-
 /**
   * Created by serg on 8/9/16.
   */
@@ -19,17 +17,24 @@ object TwoSum {
     Write your numeric answer (an integer between 0 and 20001) in the space provided.
    */
 
+  @inline
+  def hasSum(t:Int, array: Array[Long], hash: Map[Long, Long]):Boolean = {
+    var i = 0
+    while(i < array.length) {
+      val y = t - array(i)
+      if (hash.contains(y) && y != array(i)){
+        return true
+      }
+      i += 1
+    }
+    false
+  }
 
   def main(args: Array[String]): Unit = {
     import Util._
-    val hashSet = HashSet(Util.readArrayFromFile[Long]("2sum.txt"):_*)
-    val hasSum = for{
-      t <- -10000 to 10000
-      x <- hashSet if hashSet.contains(t - x) && (t -x) != x
-    } yield {
-      println(t)
-      t
-    }
-    println(hasSum.size)
+    val array = Util.readArrayFromFile[Long]("2sum.txt")
+    val hash = array.map(x => x -> x).toMap
+    val sums = for(t <- (-10000 to 10000).par) yield hasSum(t, array, hash)
+    println(sums.count(x => x) == 427)
   }
 }
