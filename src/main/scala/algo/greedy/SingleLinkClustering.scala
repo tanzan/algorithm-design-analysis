@@ -21,30 +21,35 @@ object SingleLinkClustering {
     var queue = graph.edges.toVector.sortWith(_.weight < _.weight)
     val clusters = mutable.Set.empty[CVertex]
     clusters ++= graph.vertices
-    var maxSpacing = 0
     while(clusters.size > k) {
       val edge = queue.head
       queue = queue.tail
       if (edge.v1.leader != edge.v2.leader) {
-        maxSpacing = edge.weight
         val leader1 = graph.vertex(edge.v1.leader).get
         val leader2 = graph.vertex(edge.v2.leader).get
         if (leader1.followers.size < leader2.followers.size) {
           leader1.followers.foreach(v => v.leader = leader2.id)
-          leader1.leader = leader2.id
           leader2.followers ++= leader1.followers
           leader1.followers.clear()
           clusters -= leader1
         } else {
           leader2.followers.foreach(v => v.leader = leader1.id)
-          leader2.leader = leader1.id
           leader1.followers ++= leader2.followers
           leader2.followers.clear()
           clusters -= leader2
         }
       }
     }
+    var maxSpacing = Int.MaxValue
+    while (queue.nonEmpty) {
+      val edge = queue.head
+      queue = queue.tail
+      if (edge.v1.leader != edge.v2.leader) {
+        maxSpacing = Math.min(edge.weight, maxSpacing)
+      }
+    }
     (maxSpacing, clusters.toSet)
+
   }
 
   def main(args: Array[String]): Unit = {
