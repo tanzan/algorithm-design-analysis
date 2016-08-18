@@ -36,7 +36,7 @@ object DijkstraShortestPath {
   }
 
   def main(args: Array[String]): Unit = {
-    val g = Graph.readWeightedFromFile("dijkstraData.txt")
+    val g = Graph.readWeightedAdjacencyList("dijkstraData.txt")
     shortestPaths(g, 1)
     val expected = List(2599, 2610, 2947, 2052, 2367, 2399, 2029, 2442, 2505, 3068)
     println(List(7,37,59,82,99,115,133,165,188,197).map(id => g.vertex(id).get.distance) == expected)

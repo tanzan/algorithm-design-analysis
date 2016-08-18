@@ -45,7 +45,7 @@ object KosarajuSCC {
   }
 
   def main(args: Array[String]): Unit = {
-    val g = readFromFile[KVertex]("SCC.txt")
+    val g = read[KVertex]("SCC.txt")
     scc(g)
     println(g.vertices.groupBy(_.leader).mapValues(_.size).values.toVector.sortWith(_ > _).take(5))
   }

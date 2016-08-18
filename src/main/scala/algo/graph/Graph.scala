@@ -41,19 +41,22 @@ class Graph[V <: Vertex] {
 
 object Graph {
 
-  def readFromFile[V <: Vertex](fileName:String)(implicit createVertex: Int => V):Graph[V] = {
+  def read[V <: Vertex](fileName:String)(implicit createVertex: Int => V):Graph[V] = {
 
     val graph = new Graph[V]
 
     Source.fromFile(fileName).getLines().foreach(line => {
       val edge = line.split("\\s+").map(_.trim.toInt).toVector
-      graph.addEdge(edge(0), edge(1))
+      if (edge.length > 1) {
+        graph.addEdge(edge(0), edge(1), if (edge.length <= 2) 0 else edge(2))
+      }
     })
 
     graph
   }
 
-  def readWeightedFromFile[V <: Vertex](fileName:String)(implicit createVertex: Int => V):Graph[V] = {
+
+  def readWeightedAdjacencyList[V <: Vertex](fileName:String)(implicit createVertex: Int => V):Graph[V] = {
 
     val graph = new Graph[V]
 
