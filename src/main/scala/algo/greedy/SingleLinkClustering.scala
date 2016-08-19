@@ -38,15 +38,13 @@ object SingleLinkClustering {
 
     while(clusters.size > k) {
       val edge = extractMin()
-      if (edge.v1.leader.id != edge.v2.leader.id) {
-        val leader1 = edge.v1.leader
-        val leader2 = edge.v2.leader
-        if (leader1.followers.size < leader2.followers.size) {
-          leader2.merge(leader1)
-          clusters -= leader1
+      if (edge.v1.leader != edge.v2.leader) {
+        if (edge.v1.leader.followers.size < edge.v2.leader.followers.size) {
+          clusters -= edge.v1.leader
+          edge.v2.leader.merge(edge.v1.leader)
         } else {
-          leader1.merge(leader2)
-          clusters -= leader2
+          clusters -= edge.v2.leader
+          edge.v1.leader.merge(edge.v2.leader)
         }
       }
     }
