@@ -63,26 +63,35 @@ object SingleLinkClustering {
 
   }
 
-
   final val LabelSize = 24
 
-  def readHypercube(fileName:String):Iterable[CVertex] =
-    (for(line <- Source.fromFile(fileName).getLines().drop(1))
-      yield createVertex(Integer.parseInt(line.replace(" ", ""), 2))).toIterable
+  class HVertex(id:Int, leader:CVertex, followers:mutable.Set[CVertex], val label:Int)
+    extends CVertex(id, leader, followers)
+
+  def createHVertex(id:Int, label:Int):HVertex = {
+    val v = new HVertex(id, null, mutable.Set.empty, label)
+    v.leader = v
+    v.followers += v
+    v
+  }
+
+  def readHypercube(fileName:String):Iterable[HVertex] =
+    (for(line <- Source.fromFile(fileName).getLines().drop(1).zipWithIndex)
+      yield createHVertex(line._2, Integer.parseInt(line._1.replace(" ", ""), 2))).toIterable
 
 
-  def numOfHypercubeClusters(vertices:Iterable[CVertex], minSpacing:Int):Int = {
+  def numOfHypercubeClusters(vertices:Iterable[HVertex], minSpacing:Int):Int = {
 
-    val vertexMap:Map[Int, CVertex] = vertices.map(v => v.id -> v).toMap
+    val vertexMap:Map[Int, HVertex] = vertices.map(v => v.label -> v).toMap
 
     def bitsToInt(bits:Vector[Int]):Int =
       bits.zipWithIndex.foldLeft(0)((n, b) => n | (b._1 << b._2))
 
-    def edgesWithDistance(dist:Int):Iterable[Edge[CVertex]] = {
+    def edgesWithDistance(dist:Int):Iterable[Edge[HVertex]] = {
       val diffs = (Vector.fill(dist)(1) ++ Vector.fill(LabelSize - dist)(0))
         .permutations.map(x => bitsToInt(x)).toIterable
-      for(d <- diffs; v <- vertices if vertexMap.contains(v.id ^ d))
-        yield Edge[CVertex](v, vertexMap(v.id ^ d), dist)
+      for(d <- diffs; v <- vertices if vertexMap.contains(v.label ^ d))
+        yield Edge[HVertex](v, vertexMap(v.label ^ d), dist)
     }
 
     val clusters = mutable.Set.empty[CVertex]
