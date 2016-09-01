@@ -41,11 +41,12 @@ object AllPairsShortestPaths {
 
     def sizes:Array[Array[Int]] = current
 
-    def maxSize:(Int, Int, Int) = {
-      var ms:(Int, Int, Int) = (-1, -1, Int.MinValue)
+    def maxSize:Option[(Int, Int, Int)] = {
+      var ms:Option[(Int, Int, Int)] = None
       for(i <- 0 until size) {
         for(j <- 0 until size) {
-          if (ms._3 < current(i)(j)) ms = (i, j, current(i)(j))
+          if (i == j && current(i)(j) < 0) return None
+          if (ms.isEmpty || ms.forall(_._3 < current(i)(j))) ms = Some((i, j, current(i)(j)))
         }
       }
       ms
@@ -83,8 +84,12 @@ object AllPairsShortestPaths {
   }
 
   def main(args: Array[String]): Unit = {
-    val g1 = Graph.read("apsp-g1.txt", skip = 1)
-    println(floydWarshall(g1).maxSize)
+    val s1 = floydWarshall(Graph.read("apsp-g1.txt", skip = 1)).maxSize
+    println(s1)
+    val s2 = floydWarshall(Graph.read("apsp-g2.txt", skip = 1)).maxSize
+    println(s2)
+    val s3 = floydWarshall(Graph.read("apsp-g3.txt", skip = 1)).maxSize
+    println(s3)
   }
 
 }
