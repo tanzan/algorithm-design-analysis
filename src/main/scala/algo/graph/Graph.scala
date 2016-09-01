@@ -22,7 +22,7 @@ class Graph[V <: Vertex] {
   def vertices:Iterable[V] = _vertices.values
   def adjList(vertex: V):Iterable[V] = _adjList.getOrElse(vertex, Seq.empty)
   def edges:Iterable[Edge[V]] = _edges.values.flatten
-  def edge(vertex1: V, vertex2: V):Iterable[Edge[V]] = _edges((vertex1, vertex2))
+  def edge(vertex1: V, vertex2: V):Iterable[Edge[V]] = _edges.getOrElse((vertex1, vertex2), Vector.empty)
 
   def invert()(implicit createVertex:Int => V):Graph[V] = {
 
@@ -41,11 +41,11 @@ class Graph[V <: Vertex] {
 
 object Graph {
 
-  def read[V <: Vertex](fileName:String)(implicit createVertex: Int => V):Graph[V] = {
+  def read[V <: Vertex](fileName:String, skip:Int = 0)(implicit createVertex: Int => V):Graph[V] = {
 
     val graph = new Graph[V]
 
-    Source.fromFile(fileName).getLines().foreach(line => {
+    Source.fromFile(fileName).getLines().drop(skip).foreach(line => {
       val edge = line.split("\\s+").map(_.trim.toInt).toVector
       if (edge.length > 1) {
         graph.addEdge(edge(0), edge(1), if (edge.length <= 2) 0 else edge(2))

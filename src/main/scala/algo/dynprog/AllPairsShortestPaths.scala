@@ -11,37 +11,80 @@ object AllPairsShortestPaths {
 
   implicit def createIDVertex(id:Int):IDVertex = new IDVertex(id)
 
-  def floydWarshall(graph:Graph[IDVertex]):Array[Array[Array[Int]]] = {
+
+  class FWSolution(size: Int) {
+
+    private var k = 0
+    private var prev:Array[Array[Int]] = _
+    private var current:Array[Array[Int]] = Array.ofDim(size, size)
+
+    def nonComplete():Boolean = k < size
+
+    def isComplete():Boolean = !nonComplete()
+
+    def next():Unit = {
+      k += 1
+      prev = current
+      current = Array.ofDim[Int](size, size)
+    }
+
+    def apply(i:Int, j:Int, k:Int):Int = {
+      if (k > this.k || k < this.k - 1) throw new ArrayIndexOutOfBoundsException
+      if (k == this.k - 1) prev(i)(j)
+      else current(i)(j)
+    }
+
+    def update(i:Int, j:Int, k:Int, value:Int):Unit = {
+      if (k != this.k) throw new IllegalArgumentException
+      current(i)(j) = value
+    }
+
+    def sizes:Array[Array[Int]] = current
+
+    def maxSize:(Int, Int, Int) = {
+      var ms:(Int, Int, Int) = (-1, -1, Int.MinValue)
+      for(i <- 0 until size) {
+        for(j <- 0 until size) {
+          if (ms._3 < current(i)(j)) ms = (i, j, current(i)(j))
+        }
+      }
+      ms
+    }
+
+  }
+
+  def floydWarshall(graph:Graph[IDVertex]):FWSolution = {
+
     val vertices = graph.vertices.toSeq
-    val solutions = Array.ofDim[Int](vertices.size, vertices.size, vertices.size + 1)
+    val solution = new FWSolution(vertices.size)
 
     for(i <- vertices.indices){
       for(j <- vertices.indices) {
-        if (i == j) solutions(i)(j)(0) = 0
+        if (i == j) solution(i, j, 0) = 0
         else
-          solutions(i)(j)(0) = graph.edge(vertices(i), vertices(j))
+          solution(i, j, 0) = graph.edge(vertices(i), vertices(j))
             .headOption.map(_.weight).getOrElse(Int.MaxValue)
       }
     }
 
     for(k <- 1 to vertices.size) {
+      solution.next()
       for(i <- vertices.indices) {
         for(j <- vertices.indices) {
-          solutions(i)(j)(k) = Math.min(
-            solutions(i)(j)(k - 1),
-            solutions(i)(k - 1)(k - 1) + solutions(k - 1)(j)(k - 1)
+          solution(i, j, k) = Math.min(
+            solution(i, j, k - 1),
+            solution(i, k - 1, k - 1) + solution(k - 1, j, k - 1)
           )
         }
       }
     }
 
-    solutions
+    solution
   }
 
   def main(args: Array[String]): Unit = {
-    val g1 = Graph.read("apsp-g1.txt")
-    println(g1.vertices.size)
-    //println(floydWarshall(g1))
+    val g1 = Graph.read("apsp-g1.txt", skip = 1)
+    println(floydWarshall(g1).maxSize)
   }
 
 }
