@@ -9,6 +9,11 @@ object TravelingSalesman {
 
   case class Location(x:Double, y:Double)
 
+
+  def tsp(locations:Seq[Location]):Double = {
+    ???
+  }
+
   def readLocations(fileName:String):Seq[Location] =
     (for(line <- Source.fromFile(fileName).getLines().drop(1)) yield {
       val loc = line.split("\\s")
