@@ -14,24 +14,28 @@ object TravelingSalesman {
   }
 
   def tsp(locations:Seq[Location], start:Int):Double = {
-    var current = mutable.Map[(Set[Location], Location), Double]()
-    current += (Set(locations(start)), locations(start)) -> 0.0
-    var former:mutable.Map[(Set[Location], Location), Double] = null
+
+    def keyOf(set:Iterable[Location], k:Location): Long =
+      (set.foldLeft(0L)((key,loc) => key | (1 << loc.id)) << 32) | k.id
+
+    var current = mutable.Map[Long, Double]()
+    current += keyOf(Set(locations(start)), locations(start)) -> 0.0
+    var former:mutable.Map[Long, Double] = null
     for(m <- 2 to locations.size) {
       println(m)
       former = current
-      current = mutable.Map[(Set[Location], Location), Double]()
+      current = mutable.Map[Long,  Double]()
       for (s <- locations.combinations(m).map(_.toSet) if s.exists(_.id == start)){
         for(j <- s if j != locations(start)) {
           var dist = Double.PositiveInfinity
           for(k <- s if k != j) {
-            dist = Math.min(dist, former.getOrElse((s - j, k), Double.PositiveInfinity) + k.distance(j))
+            dist = Math.min(dist, former.getOrElse(keyOf(s - j, k), Double.PositiveInfinity) + k.distance(j))
           }
-          current += (s, j) -> dist
+          current += keyOf(s, j) -> dist
         }
       }
     }
-    current.map(solution => solution._1._2.distance(locations(start)) + solution._2).min
+    current.map(solution => locations(solution._1.toInt).distance(locations(start)) + solution._2).min
   }
 
   def readLocations(fileName:String):Seq[Location] =
@@ -42,7 +46,7 @@ object TravelingSalesman {
 
 
   def main(args: Array[String]): Unit = {
-    val locations = readLocations("tsp-simple.txt")
+    val locations = readLocations("tsp.txt")
     println(tsp(locations, 0))
   }
 
