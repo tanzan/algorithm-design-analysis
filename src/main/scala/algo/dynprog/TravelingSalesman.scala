@@ -1,5 +1,6 @@
 package algo.dynprog
 
+import scala.collection.mutable
 import scala.io.Source
 
 /**
@@ -12,15 +13,25 @@ object TravelingSalesman {
       Math.sqrt(Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2))
   }
 
-  case class Solution(locations:Set[Location], dist:Double, last:Location) {
-    def +(location: Location):Solution =
-      Solution(locations + location, dist + (if (locations.isEmpty) 0.0 else locations.map(_.distance(location)).min), location)
-  }
-
   def tsp(locations:Seq[Location], start:Int):Double = {
-    locations.toStream.foldLeft(Set(Solution(Set(locations(start)), 0, locations(start))).toStream) ((a, e) => a.flatMap(s => Set(s) ++ Set(s + e)))
-      .filter(loc => loc.locations.size  == locations.size - 1 && loc.locations.exists(_.id == start))
-      .map(solution => solution.dist + solution.last.distance(locations(start))).min
+    var current = mutable.Map[(Set[Location], Location), Double]()
+    current += (Set(locations(start)), locations(start)) -> 0.0
+    var former:mutable.Map[(Set[Location], Location), Double] = null
+    for(m <- 2 to locations.size) {
+      println(m)
+      former = current
+      current = mutable.Map[(Set[Location], Location), Double]()
+      for (s <- locations.combinations(m).map(_.toSet) if s.exists(_.id == start)){
+        for(j <- s if j != locations(start)) {
+          var dist = Double.PositiveInfinity
+          for(k <- s if k != j) {
+            dist = Math.min(dist, former.getOrElse((s - j, k), Double.PositiveInfinity) + k.distance(j))
+          }
+          current += (s, j) -> dist
+        }
+      }
+    }
+    current.map(solution => solution._1._2.distance(locations(start)) + solution._2).min
   }
 
   def readLocations(fileName:String):Seq[Location] =
@@ -31,10 +42,8 @@ object TravelingSalesman {
 
 
   def main(args: Array[String]): Unit = {
-    val locations = readLocations("tsp.txt")
-    println(locations)
-    println(locations.size)
-    println(tsp(locations, 1))
+    val locations = readLocations("tsp-simple.txt")
+    println(tsp(locations, 0))
   }
 
 }
