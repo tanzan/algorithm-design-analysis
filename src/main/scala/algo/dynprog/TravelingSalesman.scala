@@ -15,23 +15,24 @@ object TravelingSalesman {
 
   def tsp(locations:Seq[Location], start:Int):Double = {
 
-    def keyOf(set:Iterable[Location], k:Location): Long =
-      (set.foldLeft(0L)((key,loc) => key | (1 << loc.id)) << 32) | k.id
+    def keyOf(set:Iterable[Location], k:Int): Long =
+      (set.foldLeft(0L)((key,loc) => key | (1 << loc.id)) << 32) | k
 
     var current = mutable.Map[Long, Double]()
-    current += keyOf(Set(locations(start)), locations(start)) -> 0.0
+    current += keyOf(Set(locations(start)), start) -> 0.0
     var former:mutable.Map[Long, Double] = null
     for(m <- 2 to locations.size) {
       println(m)
       former = current
       current = mutable.Map[Long,  Double]()
       for (s <- locations.combinations(m).map(_.toSet) if s.exists(_.id == start)){
+        val sId = keyOf(s, 0)
         for(j <- s if j != locations(start)) {
           var dist = Double.PositiveInfinity
           for(k <- s if k != j) {
-            dist = Math.min(dist, former.getOrElse(keyOf(s - j, k), Double.PositiveInfinity) + k.distance(j))
+            dist = Math.min(dist, former.getOrElse((sId ^ ((1L << j.id) << 32)) | k.id, Double.PositiveInfinity) + k.distance(j))
           }
-          current += keyOf(s, j) -> dist
+          current += (sId | j.id) -> dist
         }
       }
     }
