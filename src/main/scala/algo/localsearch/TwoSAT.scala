@@ -117,24 +117,25 @@ object TwoSAT {
 
 
   def main(args: Array[String]): Unit = {
-    //val cs1 = readClauses("2sat1.txt")
-    //println(cs1.vars.size == cs1.clauses.size)
-    //println(papadimitrou(cs1) == true)
+    val cs1 = readClauses("2sat1.txt")
+    println(papadimitrou(cs1) == true)
 
-    //val cs2 = readClauses("2sat2.txt")
-    //println(papadimitrou(cs2) == false)
+    val cs2 = readClauses("2sat2.txt")
+    println(papadimitrou(cs2) == false)
 
-    //val cs3 = readClauses("2sat3.txt")
-    //println(papadimitrou(cs3) == false)
+    val cs3 = readClauses("2sat3.txt")
+    println(papadimitrou(cs3) == true)
 
-    //val cs4 = readClauses("2sat4.txt")
-    //println(papadimitrou(cs4) == true)
+    val cs4 = readClauses("2sat4.txt")
+    println(papadimitrou(cs4) == true)
 
-    //val cs5 = readClauses("2sat5.txt")
-    //println(papadimitrou(cs5) == false)
+    val cs5 = readClauses("2sat5.txt")
+    println(papadimitrou(cs5) == false)
 
-    //val cs6 = readClauses("2sat6.txt")
-    //println(papadimitrou(cs6))
+    val cs6 = readClauses("2sat6.txt")
+    println(papadimitrou(cs6) == false)
+
+    //101100
   }
 
 }
