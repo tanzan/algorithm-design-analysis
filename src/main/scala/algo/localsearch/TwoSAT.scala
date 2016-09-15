@@ -1,5 +1,6 @@
 package algo.localsearch
 
+import scala.collection.mutable
 import scala.io.Source
 import scala.util.Random
 
@@ -10,46 +11,101 @@ object TwoSAT {
 
   val random = Random
 
-  case class Clause(x:Int, y:Int) {
-    def randomFlip():Clause =
-      if (random.nextBoolean()) copy(x = -x)
-      else copy(y = -y)
+  trait Var {
+
+    def apply(): Boolean
+
+    def update(value: Boolean): Unit
+
+    def flip():Unit
   }
 
-  def papadimitrou(clauses:Seq[Clause]):Boolean = {
+  class Instance extends Var {
 
-    for(i <- 1 to (Math.log(clauses.size)/Math.log(2)).toInt){
-      var assignment = clauses.map(_.randomFlip().randomFlip())
-      for(j <- 1 to 2*clauses.size*clauses.size) {
-        if (clauses.zip(assignment).forall(pair => pair._1 == pair._2)) return true
-        val index = random.nextInt(assignment.size)
-        val clause = assignment(index)
-        assignment = (assignment.take(index) :+ clause.randomFlip()) ++ assignment.drop(index + 1)
+    private var value = false
+
+    override def apply(): Boolean = value
+
+    override def update(value: Boolean): Unit = this.value = value
+
+    override def flip():Unit = value = !value
+
+  }
+
+  class Not(val variable:Var) extends Var {
+
+    override def apply(): Boolean = !variable()
+
+    override def update(value: Boolean): Unit =  variable() = (value)
+
+    override def flip(): Unit = variable.flip()
+  }
+
+  class Clause(val x:Var, val y:Var) {
+    def randomFlip():Unit =
+      if (random.nextBoolean()) x.flip()
+      else y.flip()
+
+    def apply():Boolean = x() || y()
+  }
+
+  class Expression {
+
+    private val varMap = mutable.Map[Int, Var]()
+
+    private val _clauses = mutable.ArrayBuffer[Clause]()
+
+    val vars:Iterable[Var] = varMap.values
+
+    val clauses:Seq[Clause] = _clauses
+
+    def addClause(x:Int, y:Int):Unit = {
+      val xv = varMap.getOrElseUpdate(Math.abs(x), new Instance())
+      val yv = varMap.getOrElseUpdate(Math.abs(y), new Instance())
+
+      _clauses += new Clause(if (x > 0) xv else new Not(xv), if (y > 0) yv else new Not(yv))
+    }
+
+    def apply():Boolean = clauses.forall(_())
+  }
+
+  def papadimitrou(expr: Expression):Boolean = {
+
+    for(i <- 1 to (Math.log(expr.vars.size)/Math.log(2)).toInt){
+      expr.vars.foreach(_() = random.nextBoolean())
+      for(j <- 1 to 2*expr.vars.size*expr.vars.size) {
+        if (expr()) return true
+        val unsatisfied = expr.clauses.filter(!_())
+        unsatisfied(random.nextInt(unsatisfied.size)).randomFlip()
       }
     }
 
     false
   }
 
-  def readClauses(fileName:String):Seq[Clause] =
-    Source.fromFile(fileName).getLines().drop(1).map{ line =>
-      val clause = line.split("\\s+")
-      Clause(clause(0).toInt, clause(1).toInt)
-    }.toSeq
+  def readClauses(fileName:String):Expression = {
+    val expr = new Expression
+    Source.fromFile(fileName).getLines().drop(1).foreach{ line =>
+      val vars = line.split("\\s+").map(_.toInt)
+      expr.addClause(vars(0), vars(1))
+    }
+    expr
+  }
 
 
   def main(args: Array[String]): Unit = {
     val cs1 = readClauses("2sat1.txt")
+    println(cs1.vars.size)
     println(papadimitrou(cs1))
 
-    val cs2 = readClauses("2sat2.txt")
-    println(papadimitrou(cs2))
+    //val cs2 = readClauses("2sat2.txt")
+    //println(papadimitrou(cs2))
 
-    val cs3 = readClauses("2sat3.txt")
-    println(papadimitrou(cs3))
+    //val cs3 = readClauses("2sat3.txt")
+    //println(papadimitrou(cs3))
 
-    val cs4 = readClauses("2sat4.txt")
-    println(papadimitrou(cs4))
+    //val cs4 = readClauses("2sat4.txt")
+    //println(papadimitrou(cs4))
 
     //val cs5 = readClauses("2sat5.txt")
     //println(papadimitrou(cs5))
