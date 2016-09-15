@@ -18,30 +18,48 @@ object TwoSAT {
     def update(value: Boolean): Unit
 
     def flip():Unit
+
+    def onChange(action: => Unit):Unit
   }
 
   class Instance extends Var {
 
     private var value = false
 
+    private val actions = mutable.Set[() => Unit]()
+
     override def apply(): Boolean = value
 
-    override def update(value: Boolean): Unit = this.value = value
+    override def update(value: Boolean): Unit = {
+      this.value = value
+      actions.foreach(_())
+    }
 
-    override def flip():Unit = value = !value
+    override def flip():Unit = this() = !value
 
+    override def onChange(action: => Unit): Unit = actions += (() => action)
   }
 
   class Not(val variable:Var) extends Var {
 
     override def apply(): Boolean = !variable()
 
-    override def update(value: Boolean): Unit =  variable() = (value)
+    override def update(value: Boolean): Unit =  variable() = value
 
     override def flip(): Unit = variable.flip()
+
+    override def onChange(action: => Unit): Unit = variable.onChange(action)
   }
 
-  class Clause(val x:Var, val y:Var) {
+  class Clause(val x:Var, val y:Var, expression: Expression) {
+
+    x.onChange(updateExpression())
+    y.onChange(updateExpression())
+
+    private def updateExpression():Unit =
+      if (this()) expression._unsatisfied -= this
+      else expression._unsatisfied += this
+
     def randomFlip():Unit =
       if (random.nextBoolean()) x.flip()
       else y.flip()
@@ -55,18 +73,24 @@ object TwoSAT {
 
     private val _clauses = mutable.ArrayBuffer[Clause]()
 
+    private[TwoSAT] val _unsatisfied = mutable.Set[Clause]()
+
     val vars:Iterable[Var] = varMap.values
 
-    val clauses:Seq[Clause] = _clauses
+    val clauses:Iterable[Clause] = _clauses
+
+    val unsatisfied:Iterable[Clause] = _unsatisfied
 
     def addClause(x:Int, y:Int):Unit = {
       val xv = varMap.getOrElseUpdate(Math.abs(x), new Instance())
       val yv = varMap.getOrElseUpdate(Math.abs(y), new Instance())
 
-      _clauses += new Clause(if (x > 0) xv else new Not(xv), if (y > 0) yv else new Not(yv))
+      val clause = new Clause(if (x > 0) xv else new Not(xv), if (y > 0) yv else new Not(yv), this)
+      _clauses += clause
+      _unsatisfied +=  clause
     }
 
-    def apply():Boolean = clauses.forall(_())
+    def apply():Boolean = unsatisfied.isEmpty
   }
 
   def papadimitrou(expr: Expression):Boolean = {
@@ -75,8 +99,7 @@ object TwoSAT {
       expr.vars.foreach(_() = random.nextBoolean())
       for(j <- 1 to 2*expr.vars.size*expr.vars.size) {
         if (expr()) return true
-        val unsatisfied = expr.clauses.filter(!_())
-        unsatisfied(random.nextInt(unsatisfied.size)).randomFlip()
+        expr.unsatisfied.head.randomFlip()
       }
     }
 
@@ -94,21 +117,21 @@ object TwoSAT {
 
 
   def main(args: Array[String]): Unit = {
-    val cs1 = readClauses("2sat1.txt")
-    println(cs1.vars.size)
-    println(papadimitrou(cs1))
+    //val cs1 = readClauses("2sat1.txt")
+    //println(cs1.vars.size == cs1.clauses.size)
+    //println(papadimitrou(cs1) == true)
 
     //val cs2 = readClauses("2sat2.txt")
-    //println(papadimitrou(cs2))
+    //println(papadimitrou(cs2) == false)
 
     //val cs3 = readClauses("2sat3.txt")
-    //println(papadimitrou(cs3))
+    //println(papadimitrou(cs3) == false)
 
     //val cs4 = readClauses("2sat4.txt")
-    //println(papadimitrou(cs4))
+    //println(papadimitrou(cs4) == true)
 
     //val cs5 = readClauses("2sat5.txt")
-    //println(papadimitrou(cs5))
+    //println(papadimitrou(cs5) == false)
 
     //val cs6 = readClauses("2sat6.txt")
     //println(papadimitrou(cs6))
