@@ -30,7 +30,7 @@ object OptimalBalancedTree {
 
 
   def main(args: Array[String]): Unit = {
-    println(computeOptimalExpectation(Array(0.05, 0.4, 0.08, 0.04, 0.1, 0.1, 0.23)))
+    println(computeOptimalExpectation(Array(0.2, 0.05, 0.17, 0.1, 0.2, 0.03, 0.25)) == 2.23)
   }
 
 }
