@@ -6,14 +6,14 @@ package algo.sort
 object MergeSort {
 
 
-  def sort[T <: Ordered[T]](xs:List[T]):List[T] = {
+  def sort[T : Ordering](xs:List[T]):List[T] = {
 
     def merge(xs:List[T], ys:List[T]):List[T] = {
       (xs,ys) match {
         case (Nil, _) => ys
         case (_, Nil) => xs
         case (x::xs1, y::ys1) =>
-          if (x < y) x::merge(xs1, ys)
+          if (implicitly[Ordering[T]].lt(x,y)) x::merge(xs1, ys)
           else y::merge(xs, ys1)
       }
     }
@@ -31,9 +31,9 @@ object MergeSort {
     override def compare(that: Person): Int = name.compare(that.name)
   }
 
-
   def main(args: Array[String]): Unit = {
     println(sort(List(Person("Billy"), Person("April"), Person("Willy"))))
+    println(sort(List(5,2,8,9,1)))
   }
 
 }
