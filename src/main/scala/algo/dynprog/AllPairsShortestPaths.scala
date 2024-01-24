@@ -2,6 +2,8 @@ package algo.dynprog
 
 import algo.graph.{Graph, Vertex}
 
+import scala.language.implicitConversions
+
 /**
   * Created by serg on 31.08.16.
   */
@@ -11,14 +13,13 @@ object AllPairsShortestPaths {
 
   implicit def createIDVertex(id:Int):IDVertex = IDVertex(id)
 
-
   class FWSolution(size: Int) {
 
     private var k = 0
     private var prev:Array[Array[Int]] = _
     private var current:Array[Array[Int]] = Array.ofDim(size, size)
 
-    def nonComplete():Boolean = k < size
+    private def nonComplete():Boolean = k < size
 
     def isComplete():Boolean = !nonComplete()
 

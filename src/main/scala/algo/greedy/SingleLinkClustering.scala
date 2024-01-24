@@ -4,6 +4,7 @@ import algo.graph.{Edge, Graph, Vertex}
 
 import scala.collection.mutable
 import scala.io.Source
+import scala.language.implicitConversions
 
 /**
   * Created by serg on 18.08.16.
@@ -77,7 +78,7 @@ object SingleLinkClustering {
 
   def readHypercube(fileName:String):Iterable[HVertex] =
     (for(line <- Source.fromFile(fileName).getLines().drop(1).zipWithIndex)
-      yield createHVertex(line._2, Integer.parseInt(line._1.replace(" ", ""), 2))).toIterable
+      yield createHVertex(line._2, Integer.parseInt(line._1.replace(" ", ""), 2))).iterator.to(Iterable)
 
 
   def numOfHypercubeClusters(vertices:Iterable[HVertex], minSpacing:Int):Int = {
@@ -89,7 +90,7 @@ object SingleLinkClustering {
 
     def edgesWithDistance(dist:Int):Iterable[Edge[HVertex]] = {
       val diffs = (Vector.fill(dist)(1) ++ Vector.fill(LabelSize - dist)(0))
-        .permutations.map(x => bitsToInt(x)).toIterable
+        .permutations.map(x => bitsToInt(x)).iterator.to(Iterable)
       for(d <- diffs; v <- vertices if vertexMap.contains(v.label ^ d))
         yield Edge[HVertex](v, vertexMap(v.label ^ d), dist)
     }

@@ -1,5 +1,7 @@
 package algo.graph
 
+import scala.language.implicitConversions
+
 /**
   * Created by serg on 7/29/16.
   */
@@ -47,7 +49,7 @@ object KosarajuSCC {
   def main(args: Array[String]): Unit = {
     val g = read[KVertex]("SCC.txt")
     scc(g)
-    println(g.vertices.groupBy(_.leader).mapValues(_.size).values.toVector.sortWith(_ > _).take(5))
+    println(g.vertices.groupBy(_.leader).view.mapValues(_.size).values.toVector.sortWith(_ > _).take(5))
   }
 
 }

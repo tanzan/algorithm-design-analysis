@@ -33,7 +33,7 @@ object TwoSum {
     import Util._
     val array = Util.readArrayFromFile[Long]("2sum.txt")
     val hash = array.map(x => x -> x).toMap
-    val sums = for(t <- (-10000 to 10000).par) yield hasSum(t, array, hash)
+    val sums = for(t <- -10000 to 10000) yield hasSum(t, array, hash)
     println(sums.count(x => x) == 427)
   }
 }

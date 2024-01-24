@@ -1,6 +1,7 @@
 package algo.graph
 
 import scala.collection.mutable
+import scala.language.implicitConversions
 
 /**
   * Created by serg on 8/4/16.

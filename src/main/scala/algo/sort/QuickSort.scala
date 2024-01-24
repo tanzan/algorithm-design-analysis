@@ -64,7 +64,7 @@ object QuickSort {
 
   def randomPivot(start:Int, end:Int, input:Array[Int]):Int = start + rng.nextInt(end - start)
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     import  Util._
     val input = readArrayFromFile[Int]("QuickSort.txt")
     val a1 = input.map(x => x)

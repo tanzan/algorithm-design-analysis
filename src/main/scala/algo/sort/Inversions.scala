@@ -5,7 +5,7 @@ import algo.Util
 /**
   * Created by serg on 14.07.16.
   */
-object Inversions {
+object    Inversions {
 
 
   def count(input: Array[Int]):Long = {
@@ -50,7 +50,7 @@ object Inversions {
     countAndSort(0, input.length)
   }
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     import Util._
     val arr = readArrayFromFile[Int]("IntegerArray.txt")
     println(count(arr))
