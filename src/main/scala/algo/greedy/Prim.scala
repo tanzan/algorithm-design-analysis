@@ -1,6 +1,7 @@
 package algo.greedy
 
 import algo.graph.{Edge, Graph, Vertex}
+import algo.struct.BinaryHeap
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -19,18 +20,11 @@ object Prim {
 
   implicit def createVertex(id: Int): PVertex = new PVertex(id)
 
-
   def minimumSpanningTree(graph: Graph[PVertex]): Set[Edge[PVertex]] = {
 
-    implicit val vOrder: Ordering[PVertex] = Ordering.by((v: PVertex) => v.weight)
+    implicit val vOrder: Ordering[PVertex] = Ordering.by(_.weight)
 
-    val heap = mutable.HashSet[PVertex]()
-
-    def extractMin(): PVertex = {
-      val v = heap.min
-      heap.remove(v)
-      v
-    }
+    val heap = new BinaryHeap[PVertex]()
 
     val winner = mutable.HashMap.empty[PVertex, Edge[PVertex]]
 
@@ -38,36 +32,30 @@ object Prim {
     val mstVertices = mutable.Set.empty[PVertex]
     mstVertices += start
 
-    var z = 0
 
-    for {
-      v <- graph.adjList(start)
-      edge <- graph.edge(start, v)
-      if v.weight > edge.weight
-    } {
-      heap.remove(v)
-      v.weight = edge.weight
-      winner.put(v, edge)
-      heap.add(v)
-    }
-
-    val mst = mutable.Set.empty[Edge[PVertex]]
-
-    while (heap.nonEmpty) {
-      val v = extractMin()
-      mstVertices += v
-      mst += winner(v)
+    def updateWeights(v: PVertex): Unit = {
       for {
         w <- graph.adjList(v)
         if !mstVertices.contains(w)
         edge <- graph.edge(v, w)
         if w.weight > edge.weight
       } {
-        heap.remove(w)
+        heap.removeAll(w)
         w.weight = edge.weight
-        heap.add(w)
         winner.put(w, edge)
+        heap.insert(w)
       }
+    }
+
+    updateWeights(start)
+
+    val mst = mutable.Set.empty[Edge[PVertex]]
+
+    while (heap.nonEmpty) {
+      val v = heap.extractMin()
+      mstVertices += v
+      mst += winner(v)
+      updateWeights(v)
     }
 
     mst.toSet

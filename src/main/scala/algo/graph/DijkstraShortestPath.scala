@@ -1,6 +1,7 @@
 package algo.graph
 
-import scala.collection.mutable
+import algo.struct.BinaryHeap
+
 import scala.language.implicitConversions
 
 /**
@@ -14,21 +15,28 @@ object DijkstraShortestPath {
 
   def shortestPaths(graph: Graph[DVertex], sourceId:Int):Unit = {
 
-    def relax(v1:DVertex, v2:DVertex):Unit = {
+    graph.vertex(sourceId).foreach(_.distance = 0)
+
+    implicit val vOrdering: Ordering[DVertex] = Ordering.by[DVertex, Int](_.distance)
+
+    val heap = new BinaryHeap[DVertex]()
+    for {
+      v <- graph.vertices
+    } {
+      heap.insert(v)
+    }
+
+    def relax(v1: DVertex, v2: DVertex): Unit = {
       val dist = v1.distance + graph.edge(v1, v2).map(_.weight).toVector.min
       if (v2.distance > dist) {
+        heap.removeAll(v2)
         v2.distance = dist
+        heap.insert(v2)
       }
     }
 
-    graph.vertex(sourceId).foreach(_.distance = 0)
-
-    val heap = mutable.Set[DVertex]()
-    heap ++= graph.vertices
-
     while(heap.nonEmpty) {
-      val v1 = heap.minBy(_.distance)
-      heap -= v1
+      val v1 = heap.extractMin()
       for (v2 <- graph.adjList(v1)) {
         relax(v1, v2)
       }
