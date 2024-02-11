@@ -1,7 +1,7 @@
 package algo.greedy
 
 import algo.graph.{Edge, Graph, Vertex}
-import algo.struct.BinaryHeap
+import algo.struct.{Referencing, ReferencingBinaryHeap}
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -9,7 +9,7 @@ import scala.language.implicitConversions
 
 object Prim {
 
-  class PVertex(val id: Int, var weight: Int = Int.MaxValue) extends Vertex {
+  class PVertex(val id: Int, var weight: Int = Int.MaxValue, var hPointer: Int = Referencing.Nil) extends Vertex {
     override def toString: String = s"$id($weight)"
     override def equals(obj: scala.Any): Boolean = obj match {
       case v: PVertex => id == v.id
@@ -22,9 +22,13 @@ object Prim {
 
   def minimumSpanningTree(graph: Graph[PVertex]): Set[Edge[PVertex]] = {
 
-    implicit val vOrder: Ordering[PVertex] = Ordering.by(_.weight)
+    implicit val vOrder: Ordering[PVertex] = Ordering.by(v => v.weight)
+    implicit val referencing: Referencing[PVertex] = new Referencing[PVertex] {
+      override def update(x: PVertex, i: Int): Unit = x.hPointer = i
+      override def of(x: PVertex): Int = x.hPointer
+    }
 
-    val heap = new BinaryHeap[PVertex]()
+    val heap = new ReferencingBinaryHeap[PVertex]()
 
     val winner = mutable.HashMap.empty[PVertex, Edge[PVertex]]
 
@@ -40,7 +44,7 @@ object Prim {
         edge <- graph.edge(v, w)
         if w.weight > edge.weight
       } {
-        heap.removeAll(w)
+        if (w.hPointer > 0) heap.remove(w)
         w.weight = edge.weight
         winner.put(w, edge)
         heap.insert(w)
