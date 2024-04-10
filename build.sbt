@@ -23,8 +23,6 @@ testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 Benchmark / parallelExecution  := false
 Benchmark / fork := true
-Benchmark / outputStrategy := Some(StdoutOutput)
-Benchmark / connectInput := true
 Benchmark / logBuffered  := false
 
 configs(Benchmark)

@@ -1,4 +1,5 @@
-import algo.struct.{Referencing, ReferencingBinaryHeap}
+package algo.struct
+
 import org.scalameter.Bench
 import org.scalameter.api.Gen
 

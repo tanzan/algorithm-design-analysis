@@ -2,11 +2,9 @@ package algo.sort
 
 import algo.Util
 
+import java.util
+import scala.reflect.ClassTag
 import scala.util.Random
-
-/**
-  * Created by serg on 18.07.16.
-  */
 
 object QuickSort {
 
@@ -40,6 +38,48 @@ object QuickSort {
     }
   }
 
+
+  def sort[T : Ordering : ClassTag](input: Array[T]): Array[T] = {
+    val ord = implicitly[Ordering[T]]
+    val output = Array.copyAs[T](input, input.length)
+
+    def swap(i: Int, j: Int): Unit = {
+      val tmp = output(i)
+      output(i) = output(j)
+      output(j) = tmp
+    }
+
+    def partition(low: Int, hi: Int): Int = {
+      val pivot = hi
+      var i = low
+      for {
+        j <- low to hi
+        if ord.lt(output(j), output(pivot))
+      } {
+        swap(i, j)
+        i += 1
+      }
+      swap(i, pivot)
+      i
+    }
+
+    def doSort(low: Int, hi: Int): Unit = {
+      var stack = (low, hi) :: Nil
+      while (stack.nonEmpty) {
+        val (low, hi) = stack.head
+        stack = stack.tail
+        if (low < hi) {
+          val p = partition(low, hi)
+          stack = (low, p - 1) :: stack
+          stack = (p + 1, hi) :: stack
+        }
+      }
+    }
+
+    doSort(0, input.length - 1)
+    output
+  }
+
   def sortWith(array:Array[Int], choosePivot:(Int, Int, Array[Int]) => Int):Int =
     sort(array, 0, array.length, choosePivot)
 
@@ -65,7 +105,7 @@ object QuickSort {
   def randomPivot(start:Int, end:Int, input:Array[Int]):Int = start + rng.nextInt(end - start)
 
   def main(args: Array[String]): Unit = {
-    import  Util._
+    import Util._
     val input = readArrayFromFile[Int]("QuickSort.txt")
     val a1 = input.map(x => x)
     val a2 = input.map(x => x)
@@ -77,6 +117,11 @@ object QuickSort {
     println(sortWith(a2, endPivot))
     println(sortWith(a3, medianPivot))
     println(sortWith(a5, randomPivot))
+    println(sort(a1).toList)
+    println(sort(Array(1)).toList)
+    println(sort(Array(2,1)).toList)
+    println(sort(Array[Int]()).toList)
+    println(sort(Array(1,2,3,4,5)).toList)
 
     println(input.indices.forall(i => a1(i) == a2(i) && a2(i) == a3(i) && a3(i) == a4(i) && a5(i) == a4(i)))
   }
